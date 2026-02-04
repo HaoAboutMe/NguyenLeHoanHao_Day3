@@ -312,16 +312,24 @@ function showDeleteConfirmation(productId) {
 
 // ===== Search & Filter =====
 
-function handleSearch(e) {
-    const searchTerm = e.target.value.toLowerCase().trim();
+async function handleSearch(e) {
+    const searchTerm = e.target.value.trim();
     
     if (searchTerm === '') {
+        // Nếu không có từ khóa tìm kiếm, hiển thị tất cả sản phẩm
         filteredProducts = allProducts;
     } else {
-        filteredProducts = allProducts.filter(product => 
-            product.title.toLowerCase().includes(searchTerm) ||
-            (product.description && product.description.toLowerCase().includes(searchTerm))
-        );
+        // Gọi API để tìm kiếm theo title (theo đúng hướng dẫn Platzi API)
+        UI.showLoading();
+        const result = await API.searchProducts(searchTerm);
+        UI.hideLoading();
+        
+        if (result.success) {
+            filteredProducts = result.data;
+        } else {
+            UI.showAlert('Lỗi khi tìm kiếm: ' + result.error, 'danger');
+            filteredProducts = [];
+        }
     }
     
     // Apply category filter if active
